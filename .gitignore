@@ -1,0 +1,10 @@
+# Styling
+public/css/main.css
+.sass-cache/
+
+# JS
+vendor/
+node_modules/
+
+# Make
+make/.refs/*.ref
