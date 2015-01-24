@@ -188,8 +188,6 @@
 
             var rotate = 0.1 / Math.PI;
             window.onkeydown = function (e) {
-                console.log(e.keyCode);
-                // left = 39, up = 38, right = 37, down = 40
                 switch (e.keyCode) {
                     case 37: group.rotation.y -= rotate; e.preventDefault(); break; // right
                     case 38: group.rotation.x -= rotate; e.preventDefault(); break; // up
