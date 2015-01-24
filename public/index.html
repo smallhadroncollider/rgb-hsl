@@ -150,9 +150,9 @@
             }());
 
             dt.add(function (dt) {
-                group.rotation.z += (0.5 * Math.PI) / (8000 / dt);
-                group.rotation.y += (0.5 * Math.PI) / (8000 / dt);
-                group.rotation.z += (0.5 * Math.PI) / (8000 / dt);
+                // group.rotation.z += (0.5 * Math.PI) / (8000 / dt);
+                // group.rotation.y += (0.5 * Math.PI) / (8000 / dt);
+                // group.rotation.z += (0.5 * Math.PI) / (8000 / dt);
             });
 
             var toRGB = function () {
@@ -185,6 +185,17 @@
 
             toRGB();
             renderer.render(scene, camera);
+
+            var rotate = 0.1 / Math.PI;
+            window.onkeydown = function (e) {
+                // left = 39, up = 38, right = 37, down = 40
+                switch (e.keyCode) {
+                    case 37: group.rotation.y -= rotate; e.preventDefault(); break; // right
+                    case 38: group.rotation.x -= rotate; e.preventDefault(); break; // up
+                    case 39: group.rotation.y += rotate; e.preventDefault(); break; // left
+                    case 40: group.rotation.x += rotate; e.preventDefault(); break; // down
+                }
+            }
         }());
         </script>
     </body>
