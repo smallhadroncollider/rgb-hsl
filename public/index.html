@@ -168,7 +168,7 @@
                     var y = (cube.userData.hsl[2] * number * size * gap * 2) - offset * 1.5;
 
                     var r = cube.userData.hsl[1] * number * 2;
-                    var theta = (cube.userData.hsl[0] / 360) * 2 * Math.PI;
+                    var theta = -1 * (cube.userData.hsl[0] / 360) * 2 * Math.PI;
                     var x =  r * Math.cos(theta);
                     var z = r * Math.sin(theta);
 
