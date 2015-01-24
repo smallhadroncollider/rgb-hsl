@@ -26,33 +26,40 @@
             renderer.setClearColor(0x808080, 1);
             document.body.appendChild(renderer.domElement);
 
-            var factor = 25.5;
+            var factor = 30;
 
             var range = R.range(0, Math.floor(255 / factor));
-            var group = new THREE.Group();
 
             var size = 2;
             var gap = 2;
             var offset = (255/ factor) * ((size + gap) / 2);
 
-            R.forEach(function (r) {
-                R.forEach(function (g) {
-                    R.forEach(function (b) {
-                        var color = "rgb(" + Math.round(r * factor) + "," + Math.round(g * factor) + "," + Math.round(b * factor) + ")";
-                        var geometry = new THREE.BoxGeometry(size, size, size);
-                        var material = new THREE.MeshBasicMaterial({
-                            color: color
-                        });
-                        var cube = new THREE.Mesh(geometry, material);
-                        cube.translateX((r * (size + gap)) - offset);
-                        cube.translateY((g * (size + gap)) - offset);
-                        cube.translateZ((b * (size + gap)) - offset);
+            var position = function (val) {
+                return (val * (size + gap)) - offset;
+            };
 
-                        group.add(cube);
-                    }, range);
-                }, range);
-            }, range);
+            var value = function (x) {
+                return Math.round(x * factor);
+            };
 
+            var create = function (r, g, b) {
+                var rgb = R.map(value, [r, g, b]);
+
+                var color = "rgb(" + rgb.join(",") + ")";
+                var geometry = new THREE.BoxGeometry(size, size, size);
+                var material = new THREE.MeshBasicMaterial({ color: color });
+
+                return new THREE.Mesh(geometry, material)
+                                    .translateX(position(r))
+                                    .translateY(position(g))
+                                    .translateZ(position(b));
+            };
+
+            var lift = R.liftN(3, R.curryN(3, create));
+            var values = lift(range, range, range);
+
+            var group = new THREE.Group();
+            group.add.apply(group, values);
             scene.add(group);
 
             camera.position.z = (255 / factor) * 6;
