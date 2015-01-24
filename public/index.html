@@ -136,24 +136,20 @@
 
                 self.animate = function (object, property, newValue, length) {
                     var id = self.add(function (dt) {
+                        length = length - dt;
+
                         if (length <= 0) {
+                            object[property] = newValue;
                             self.remove(id);
                         }
 
                         var diff = newValue - object[property];
                         object[property] += diff / (length/dt);
-                        length = length - dt;
                     });
                 };
 
                 return self;
             }());
-
-            dt.add(function (dt) {
-                // group.rotation.z += (0.5 * Math.PI) / (8000 / dt);
-                // group.rotation.y += (0.5 * Math.PI) / (8000 / dt);
-                // group.rotation.z += (0.5 * Math.PI) / (8000 / dt);
-            });
 
             var toRGB = function () {
                 R.forEach(function (cube) {
