@@ -1,0 +1,13 @@
+{
+  "name": "name",
+  "version": "0.0.1",
+  "authors": [
+    "Mark Wales <mark@smallhadroncollider.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "threejs": "*",
+    "ramda": "~0.8.0"
+  }
+}
