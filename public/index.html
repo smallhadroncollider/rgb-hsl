@@ -17,6 +17,7 @@
         <script src="/vendor/ramda/ramda.js"></script>
 
         <button id="hsl">To HSL</button>
+        <button id="rgb">To RGB</button>
 
         <script>
         (function () {
@@ -29,7 +30,7 @@
             renderer.setClearColor(0x808080, 1);
             document.body.appendChild(renderer.domElement);
 
-            var number = 15;
+            var number = 12;
             var factor = 255 / number;
 
             var range = R.range(0, number);
@@ -82,12 +83,13 @@
                 var geometry = new THREE.BoxGeometry(size, size, size);
                 var material = new THREE.MeshBasicMaterial({ color: color });
 
-                var cube = new THREE.Mesh(geometry, material)
-                                    .translateX(position(r))
-                                    .translateY(position(g))
-                                    .translateZ(position(b));
+                r = position(r);
+                g = position(g);
+                b = position(b);
 
-                cube.userData.rgb = rgb;
+                var cube = new THREE.Mesh(geometry, material);
+
+                cube.userData.rgb = [r, g, b];
                 cube.userData.hsl = hsl.apply(null, rgb);
 
                 return cube;
@@ -100,26 +102,68 @@
             group.add.apply(group, cubes);
             scene.add(group);
 
-            var dt = function (func) {
-                var time = 0;
+            var dt = (function () {
+                var self = {},
+                    id = 0,
+                    funcs = {},
+                    time = 0,
+                    loop = function (now) {
+                        requestAnimationFrame(loop);
+                        var values = R.values(funcs);
 
-                var calc = function (now) {
-                    requestAnimationFrame(calc);
-                    func((now - time) / 1000);
-                    renderer.render(scene, camera);
-                    time = now;
+                        if (values.length) {
+                            R.forEach(function (func) {
+                                func(now - time);
+                            }, values);
+
+                            renderer.render(scene, camera);
+                        }
+
+                        time = now;
+                    };
+
+                loop(time);
+
+                self.add = function (func) {
+                    id++;
+                    funcs[id] = func;
+                    return id;
                 };
 
-                calc(time);
-            };
+                self.remove = function (id) {
+                    delete(funcs[id]);
+                };
 
-            dt(function (dt) {
-                group.rotation.z += (0.5 * Math.PI) / (8 / dt);
-                group.rotation.y += (0.5 * Math.PI) / (8 / dt);
-                group.rotation.z += (0.5 * Math.PI) / (8 / dt);
+                self.animate = function (object, property, newValue, length) {
+                    var id = self.add(function (dt) {
+                        if (length <= 0) {
+                            self.remove(id);
+                        }
+
+                        var diff = newValue - object[property];
+                        object[property] += diff / (length/dt);
+                        length = length - dt;
+                    });
+                };
+
+                return self;
+            }());
+
+            dt.add(function (dt) {
+                group.rotation.z += (0.5 * Math.PI) / (8000 / dt);
+                group.rotation.y += (0.5 * Math.PI) / (8000 / dt);
+                group.rotation.z += (0.5 * Math.PI) / (8000 / dt);
             });
 
-            document.getElementById("hsl").onclick = function () {
+            var toRGB = function () {
+                R.forEach(function (cube) {
+                    dt.animate(cube.position, "x", cube.userData.rgb[0], 5000);
+                    dt.animate(cube.position, "y", cube.userData.rgb[1], 5000);
+                    dt.animate(cube.position, "z", cube.userData.rgb[2], 5000);
+                }, cubes);
+            };
+
+            var toHSL = function () {
                 R.forEach(function (cube) {
                     var y = (cube.userData.hsl[2] * number * size * gap * 2) - offset * 1.5;
 
@@ -128,14 +172,18 @@
                     var x =  r * Math.cos(theta);
                     var z = r * Math.sin(theta);
 
-                    cube.position.x = x;
-                    cube.position.y =  y;
-                    cube.position.z = z;
+                    dt.animate(cube.position, "x", x, 5000);
+                    dt.animate(cube.position, "y", y, 5000);
+                    dt.animate(cube.position, "z", z, 5000);
                 }, cubes);
             };
 
+            document.getElementById("hsl").onclick = toHSL;
+            document.getElementById("rgb").onclick = toRGB;
+
             camera.position.z = number * 6;
 
+            toRGB();
             renderer.render(scene, camera);
         }());
         </script>
