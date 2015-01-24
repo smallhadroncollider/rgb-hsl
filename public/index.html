@@ -8,7 +8,7 @@
 
         <style>
             body { margin: 0; }
-            canvas { width: 100%; height: 100% }
+            canvas { margin: 50px auto; display: block; }
         </style>
     </head>
 
@@ -16,23 +16,56 @@
         <script src="/vendor/threejs/build/three.js"></script>
         <script src="/vendor/ramda/ramda.js"></script>
 
+        <button id="hsl">To HSL</button>
+
         <script>
+        (function () {
             "use strict";
 
             var scene = new THREE.Scene();
             var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             var renderer = new THREE.WebGLRenderer();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setSize(1000, 600);
             renderer.setClearColor(0x808080, 1);
             document.body.appendChild(renderer.domElement);
 
-            var factor = 30;
+            var number = 15;
+            var factor = 255 / number;
 
-            var range = R.range(0, Math.floor(255 / factor));
+            var range = R.range(0, number);
 
             var size = 2;
             var gap = 2;
-            var offset = (255/ factor) * ((size + gap) / 2);
+            var offset = number * ((size + gap) / 2);
+
+            var hsl = function (r, g, b) {
+                r = r / 255;
+                g = g / 255;
+                b = b / 255;
+
+                var rgb = [r, g, b];
+                var cMax = R.max(rgb);
+                var cMin = R.min(rgb);
+                var c = cMax - cMin;
+
+                var l = (cMax + cMin) / 2;
+                var s = c === 0 ? 0 : (c / (1 - Math.abs((2 * l) - 1)));
+                var h;
+
+                if (c) {
+                    if (r >= g && r >= b) {
+                        h = 60 * (((g - b)/c) % 6);
+                    } else if (g >= r && g >= b) {
+                        h = 60 * (((b - r)/c) + 2);
+                    } else if (b >= r && b >= g) {
+                        h = 60 * (((r - g)/c) + 4);
+                    }
+                } else {
+                    h = 0;
+                }
+
+                return [h, s, l];
+            };
 
             var position = function (val) {
                 return (val * (size + gap)) - offset;
@@ -49,20 +82,23 @@
                 var geometry = new THREE.BoxGeometry(size, size, size);
                 var material = new THREE.MeshBasicMaterial({ color: color });
 
-                return new THREE.Mesh(geometry, material)
+                var cube = new THREE.Mesh(geometry, material)
                                     .translateX(position(r))
                                     .translateY(position(g))
                                     .translateZ(position(b));
+
+                cube.userData.rgb = rgb;
+                cube.userData.hsl = hsl.apply(null, rgb);
+
+                return cube;
             };
 
             var lift = R.liftN(3, R.curryN(3, create));
-            var values = lift(range, range, range);
+            var cubes = lift(range, range, range);
 
             var group = new THREE.Group();
-            group.add.apply(group, values);
+            group.add.apply(group, cubes);
             scene.add(group);
-
-            camera.position.z = (255 / factor) * 6;
 
             var dt = function (func) {
                 var time = 0;
@@ -70,6 +106,7 @@
                 var calc = function (now) {
                     requestAnimationFrame(calc);
                     func((now - time) / 1000);
+                    renderer.render(scene, camera);
                     time = now;
                 };
 
@@ -80,10 +117,27 @@
                 group.rotation.z += (0.5 * Math.PI) / (8 / dt);
                 group.rotation.y += (0.5 * Math.PI) / (8 / dt);
                 group.rotation.z += (0.5 * Math.PI) / (8 / dt);
-                renderer.render(scene, camera);
             });
 
+            document.getElementById("hsl").onclick = function () {
+                R.forEach(function (cube) {
+                    var y = (cube.userData.hsl[2] * number * size * gap * 2) - offset * 1.5;
+
+                    var r = cube.userData.hsl[1] * number * 2;
+                    var theta = (cube.userData.hsl[0] / 360) * 2 * Math.PI;
+                    var x =  r * Math.cos(theta);
+                    var z = r * Math.sin(theta);
+
+                    cube.position.x = x;
+                    cube.position.y =  y;
+                    cube.position.z = z;
+                }, cubes);
+            };
+
+            camera.position.z = number * 6;
+
             renderer.render(scene, camera);
+        }());
         </script>
     </body>
 
