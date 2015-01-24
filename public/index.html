@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta charset="utf-8">
+        <title>Colour Theory</title>
+
+        <style>
+            body { margin: 0; }
+            canvas { width: 100%; height: 100% }
+        </style>
+    </head>
+
+    <body>
+        <script src="/vendor/threejs/build/three.js"></script>
+        <script src="/vendor/ramda/ramda.js"></script>
+
+        <script>
+            "use strict";
+
+            var scene = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            var renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            var factor = 25.5;
+
+            var range = R.range(0, Math.floor(255 / factor));
+            var group = new THREE.Group();
+
+            var size = 2;
+            var gap = 2;
+            var offset = (255/ factor) * ((size + gap) / 2);
+
+            R.forEach(function (r) {
+                R.forEach(function (g) {
+                    R.forEach(function (b) {
+                        var color = "rgb(" + Math.round(r * factor) + "," + Math.round(g * factor) + "," + Math.round(b * factor) + ")";
+                        var geometry = new THREE.BoxGeometry(size, size, size);
+                        var material = new THREE.MeshBasicMaterial({
+                            color: color
+                        });
+                        var cube = new THREE.Mesh(geometry, material);
+                        cube.translateX((r * (size + gap)) - offset);
+                        cube.translateY((g * (size + gap)) - offset);
+                        cube.translateZ((b * (size + gap)) - offset);
+
+                        group.add(cube);
+                    }, range);
+                }, range);
+            }, range);
+
+            scene.add(group);
+
+            camera.position.z = (255 / factor) * 6;
+
+            var dt = function (func) {
+                var time = 0;
+
+                var calc = function (now) {
+                    requestAnimationFrame(calc);
+                    func((now - time) / 1000);
+                    time = now;
+                };
+
+                calc(time);
+            };
+
+            dt(function (dt) {
+                group.rotation.z += (0.5 * Math.PI) / (8 / dt);
+                group.rotation.y += (0.5 * Math.PI) / (8 / dt);
+                group.rotation.z += (0.5 * Math.PI) / (8 / dt);
+                renderer.render(scene, camera);
+            });
+
+            renderer.render(scene, camera);
+        </script>
+    </body>
+
+</html>
