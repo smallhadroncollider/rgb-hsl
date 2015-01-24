@@ -188,14 +188,20 @@
 
             var rotate = 0.1 / Math.PI;
             window.onkeydown = function (e) {
+                console.log(e.keyCode);
                 // left = 39, up = 38, right = 37, down = 40
                 switch (e.keyCode) {
                     case 37: group.rotation.y -= rotate; e.preventDefault(); break; // right
                     case 38: group.rotation.x -= rotate; e.preventDefault(); break; // up
                     case 39: group.rotation.y += rotate; e.preventDefault(); break; // left
                     case 40: group.rotation.x += rotate; e.preventDefault(); break; // down
+
+                    case 68: camera.position.x += 1; e.preventDefault(); break; // d
+                    case 87: camera.position.z -= 1; e.preventDefault(); break; // w
+                    case 65: camera.position.x -= 1; e.preventDefault(); break; // a
+                    case 83: camera.position.z += 1; e.preventDefault(); break; // s
                 }
-            }
+            };
         }());
         </script>
     </body>
