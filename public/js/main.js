@@ -2,11 +2,12 @@
     "use strict";
 
     var R = require("../vendor/ramda/ramda");
-    var THREE = require("../vendor/threejs/build/three");
+    var three = require("../vendor/threejs/build/three");
+    var $ = require("./select");
 
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    var renderer = new THREE.WebGLRenderer();
+    var scene = new three.Scene();
+    var camera = new three.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    var renderer = new three.WebGLRenderer();
     renderer.setSize(1000, 600);
     renderer.setClearColor(0x808080, 1);
     document.body.appendChild(renderer.domElement);
@@ -61,14 +62,14 @@
         var rgb = R.map(value, [r, g, b]);
 
         var color = "rgb(" + rgb.join(",") + ")";
-        var geometry = new THREE.BoxGeometry(size, size, size);
-        var material = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 1 });
+        var geometry = new three.BoxGeometry(size, size, size);
+        var material = new three.MeshBasicMaterial({ color: color, transparent: true, opacity: 1 });
 
         r = position(r);
         g = position(g);
         b = position(b);
 
-        var cube = new THREE.Mesh(geometry, material);
+        var cube = new three.Mesh(geometry, material);
 
         cube.userData.rgb = [r, g, b];
         cube.userData.hsl = hsl.apply(null, rgb);
@@ -79,7 +80,7 @@
     var lift = R.liftN(3, R.curryN(3, create));
     var cubes = lift(range, range, range);
 
-    var group = new THREE.Group();
+    var group = new three.Group();
     group.add.apply(group, cubes);
     scene.add(group);
 
@@ -175,14 +176,17 @@
         }, cubes);
     };
 
-    document.getElementById("hsl").onclick = toHSL;
-    document.getElementById("rgb").onclick = toRGB;
+    $("hsl").onclick = toHSL;
+    $("rgb").onclick = toRGB;
 
-    var saturationSlider = document.getElementById("saturation");
+    var saturationSlider = $("saturation");
 
+    saturationSlider.oninput = function () {
+        $("saturation-value").innerHTML = saturationSlider.value;
+    };
     saturationSlider.onchange = function () {
         saturation(saturationSlider.value);
-        document.getElementById("saturation-value").innerHTML = saturationSlider.value;
+        $("saturation-value").innerHTML = saturationSlider.value;
     };
 
 
