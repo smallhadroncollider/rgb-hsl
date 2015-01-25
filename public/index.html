@@ -19,6 +19,9 @@
         <button id="hsl">To HSL</button>
         <button id="rgb">To RGB</button>
 
+        <input id="saturation" type="range" min="0" max="1" step="0.01" value="0" />
+        <label>Saturation: <span id="saturation-value">0</span></label>
+
         <script>
         (function () {
             "use strict";
@@ -81,7 +84,7 @@
 
                 var color = "rgb(" + rgb.join(",") + ")";
                 var geometry = new THREE.BoxGeometry(size, size, size);
-                var material = new THREE.MeshBasicMaterial({ color: color });
+                var material = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 1 });
 
                 r = position(r);
                 g = position(g);
@@ -136,20 +139,22 @@
 
                 self.animate = function (object, property, newValue, length) {
                     var id = self.add(function (dt) {
-                        length = length - dt;
-
                         if (length <= 0) {
-                            object[property] = newValue;
                             self.remove(id);
+                            object[property] = newValue;
                         }
 
                         var diff = newValue - object[property];
                         object[property] += diff / (length/dt);
+
+                        length = length - dt;
                     });
                 };
 
                 return self;
             }());
+
+            dt.add(function () {});
 
             var toRGB = function () {
                 R.forEach(function (cube) {
@@ -174,8 +179,34 @@
                 }, cubes);
             };
 
+            var toHSLCube = function () {
+                R.forEach(function (cube) {
+                    dt.animate(cube.position, "x", position((cube.userData.hsl[0] / 360) * factor), 5000);
+                    dt.animate(cube.position, "y", position(cube.userData.hsl[1] * factor), 5000);
+                    dt.animate(cube.position, "z", position(cube.userData.hsl[2] * factor), 5000);
+                }, cubes);
+            };
+
+            var saturation = function (val) {
+                R.forEach(function (cube) {
+                    if (cube.userData.hsl[1] > val) {
+                        dt.animate(cube.material, "opacity", 1, 1000);
+                    } else {
+                        dt.animate(cube.material, "opacity", 0.1, 1000);
+                    }
+                }, cubes);
+            };
+
             document.getElementById("hsl").onclick = toHSL;
             document.getElementById("rgb").onclick = toRGB;
+
+            var saturationSlider = document.getElementById("saturation");
+
+            saturationSlider.onchange = function () {
+                saturation(saturationSlider.value);
+                document.getElementById("saturation-value").innerHTML = saturationSlider.value;
+            };
+
 
             camera.position.z = number * 6;
 
@@ -183,6 +214,7 @@
             renderer.render(scene, camera);
 
             var rotate = 0.1 / Math.PI;
+
             window.onkeydown = function (e) {
                 switch (e.keyCode) {
                     case 37: group.rotation.y -= rotate; e.preventDefault(); break; // right
