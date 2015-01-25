@@ -284,12 +284,22 @@
     var lift = R.liftN(2, R.curryN(2, setupSlider));
     lift(["saturation", "lightness"], ["max", "min"]);
 
-
-    // add generic function to keep rerender
-    // this is dumb, should only do it while key down
-    dt.add(function () {});
-
     var rotate = 0.1 / Math.PI;
+
+    var animating = true;
+    var animate = $("animate");
+
+    animate.addEventListener("change", function () {
+        animating = animate.checked;
+    });
+
+    dt.add(function (dt) {
+        if (animating) {
+            group.rotation.x += Math.PI / (8000/dt);
+            group.rotation.y += Math.PI / (8000/dt);
+        }
+    });
+
     var camera = view.getCamera();
 
     window.onkeydown = function (e) {
