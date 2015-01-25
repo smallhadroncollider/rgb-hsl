@@ -22,8 +22,6 @@
         "require": false,
         "define": false,
         "jQuery": false,
-        "Promise": false,
-        "R": false,
-        "THREE": false
+        "Promise": false
     }
 }
