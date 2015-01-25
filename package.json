@@ -11,10 +11,7 @@
   "dependencies": {
   },
   "devDependencies": {
-    "jshint": "^2.5.1",
-    "buddy.js": "*",
     "browserify": "^8.1.0",
-    "buster": "0.7.*",
     "uglify": "^0.1.1"
   }
 }
