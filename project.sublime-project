@@ -5,7 +5,8 @@
 			"follow_symlinks": true,
 			"path": ".",
             "file_exclude_patterns": [
-                "*.sublime-project"
+                "*.sublime-project",
+                "app.js"
             ],
             "folder_exclude_patterns": [
                 "vendor",
