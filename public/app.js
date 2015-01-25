@@ -1,54 +1,51 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-(function (d) {
+(function () {
     "use strict";
 
     var R = require("../vendor/ramda/ramda");
-    var THREE = require("../vendor/threejs/build/three");
 
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    var renderer = new THREE.WebGLRenderer();
-    renderer.setSize(1000, 600);
-    renderer.setClearColor(0x808080, 1);
-    document.body.appendChild(renderer.domElement);
+    module.exports = {
+        hsl: function (r, g, b) {
+            r = r / 255;
+            g = g / 255;
+            b = b / 255;
 
-    var number = 12;
-    var factor = 255 / number;
+            var rgb = [r, g, b];
+            var cMax = R.max(rgb);
+            var cMin = R.min(rgb);
+            var c = cMax - cMin;
 
-    var range = R.range(0, number);
+            var l = (cMax + cMin) / 2;
+            var s = c === 0 ? 0 : (c / (1 - Math.abs((2 * l) - 1)));
+            var h;
 
-    var size = 2;
-    var gap = 2;
-    var offset = number * ((size + gap) / 2);
-
-    var hsl = function (r, g, b) {
-        r = r / 255;
-        g = g / 255;
-        b = b / 255;
-
-        var rgb = [r, g, b];
-        var cMax = R.max(rgb);
-        var cMin = R.min(rgb);
-        var c = cMax - cMin;
-
-        var l = (cMax + cMin) / 2;
-        var s = c === 0 ? 0 : (c / (1 - Math.abs((2 * l) - 1)));
-        var h;
-
-        if (c) {
-            if (r >= g && r >= b) {
-                h = 60 * (((g - b)/c) % 6);
-            } else if (g >= r && g >= b) {
-                h = 60 * (((b - r)/c) + 2);
-            } else if (b >= r && b >= g) {
-                h = 60 * (((r - g)/c) + 4);
+            if (c) {
+                if (r >= g && r >= b) {
+                    h = 60 * (((g - b)/c) % 6);
+                } else if (g >= r && g >= b) {
+                    h = 60 * (((b - r)/c) + 2);
+                } else if (b >= r && b >= g) {
+                    h = 60 * (((r - g)/c) + 4);
+                }
+            } else {
+                h = 0;
             }
-        } else {
-            h = 0;
-        }
 
-        return [h, s, l];
+            return [h, s, l];
+        }
     };
+}());
+
+},{"../vendor/ramda/ramda":7}],2:[function(require,module,exports){
+(function () {
+    "use strict";
+
+    var R = require("../vendor/ramda/ramda");
+    var three = require("../vendor/threejs/build/three");
+    var colour = require("./colour");
+    var dt = require("./dt");
+
+    var number, factor, range, size, gap, offset, lift, cubes, group;
 
     var position = function (val) {
         return (val * (size + gap)) - offset;
@@ -62,78 +59,37 @@
         var rgb = R.map(value, [r, g, b]);
 
         var color = "rgb(" + rgb.join(",") + ")";
-        var geometry = new THREE.BoxGeometry(size, size, size);
-        var material = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 1 });
+        var geometry = new three.BoxGeometry(size, size, size);
+        var material = new three.MeshBasicMaterial({ color: color, transparent: true, opacity: 1 });
 
         r = position(r);
         g = position(g);
         b = position(b);
 
-        var cube = new THREE.Mesh(geometry, material);
+        var cube = new three.Mesh(geometry, material);
 
         cube.userData.rgb = [r, g, b];
-        cube.userData.hsl = hsl.apply(null, rgb);
+        cube.userData.hsl = colour.hsl.apply(null, rgb);
 
         return cube;
     };
 
-    var lift = R.liftN(3, R.curryN(3, create));
-    var cubes = lift(range, range, range);
+    var initialise = function (num) {
+        number = num;
+        factor = 255 / number;
+        range = R.range(0, number);
+        size = 2;
+        gap = 2;
+        offset = number * ((size + gap) / 2);
 
-    var group = new THREE.Group();
-    group.add.apply(group, cubes);
-    scene.add(group);
+        lift = R.liftN(3, R.curryN(3, create));
+        cubes = lift(range, range, range);
 
-    var dt = (function () {
-        var self = {},
-            id = 0,
-            funcs = {},
-            time = 0,
-            loop = function (now) {
-                requestAnimationFrame(loop);
-                var values = R.values(funcs);
+        group = new three.Group();
+        group.add.apply(group, cubes);
 
-                if (values.length) {
-                    R.forEach(function (func) {
-                        func(now - time);
-                    }, values);
-
-                    renderer.render(scene, camera);
-                }
-
-                time = now;
-            };
-
-        loop(time);
-
-        self.add = function (func) {
-            id++;
-            funcs[id] = func;
-            return id;
-        };
-
-        self.remove = function (id) {
-            delete(funcs[id]);
-        };
-
-        self.animate = function (object, property, newValue, length) {
-            var id = self.add(function (dt) {
-                if (length <= 0) {
-                    self.remove(id);
-                    object[property] = newValue;
-                }
-
-                var diff = newValue - object[property];
-                object[property] += diff / (length/dt);
-
-                length = length - dt;
-            });
-        };
-
-        return self;
-    }());
-
-    dt.add(function () {});
+        return group;
+    };
 
     var toRGB = function () {
         R.forEach(function (cube) {
@@ -176,40 +132,192 @@
         }, cubes);
     };
 
-    document.getElementById("hsl").onclick = toHSL;
-    document.getElementById("rgb").onclick = toRGB;
+    module.exports = {
+        initialise: initialise,
+        toHSL: toHSL,
+        toHSLCube: toHSLCube,
+        toRGB: toRGB,
+        saturation: saturation
+    };
+}());
 
-    var saturationSlider = document.getElementById("saturation");
+},{"../vendor/ramda/ramda":7,"../vendor/threejs/build/three":8,"./colour":1,"./dt":3}],3:[function(require,module,exports){
+(function () {
+    "use strict";
 
+    var R = require("../vendor/ramda/ramda");
+    var scene = require("./scene");
+
+    var dt = function () {
+        var self = {},
+            id = 0,
+            funcs = {},
+            time = 0,
+            loop = function (now) {
+                requestAnimationFrame(loop);
+                var values = R.values(funcs);
+
+                if (values.length) {
+                    R.forEach(function (func) {
+                        func(now - time);
+                    }, values);
+
+                    scene.render();
+                }
+
+                time = now;
+            };
+
+        loop(time);
+
+        self.add = function (func) {
+            id++;
+            funcs[id] = func;
+            return id;
+        };
+
+        self.remove = function (id) {
+            delete(funcs[id]);
+        };
+
+        self.animate = function (object, property, newValue, length) {
+            var id = self.add(function (dt) {
+                if (length <= 0) {
+                    self.remove(id);
+                    object[property] = newValue;
+                }
+
+                var diff = newValue - object[property];
+                object[property] += diff / (length/dt);
+
+                length = length - dt;
+            });
+        };
+
+        return self;
+    };
+
+    module.exports = dt();
+}());
+
+},{"../vendor/ramda/ramda":7,"./scene":5}],4:[function(require,module,exports){
+(function () {
+    "use strict";
+
+    var view = require("./scene");
+    var dt = require("./dt");
+    var cubes = require("./cubes");
+
+    view.initialise(1000, 600, 0x808080);
+    view.appendTo(document.body);
+
+    var number = 12;
+    view.getCamera().position.z = number * 6;
+
+    var group = cubes.initialise(number);
+    view.getScene().add(group);
+
+    cubes.toRGB();
+    view.render();
+
+    /**
+     * Interaction
+     */
+    var $ = require("./select");
+
+    $("hsl").onclick = cubes.toHSL;
+    $("rgb").onclick = cubes.toRGB;
+
+    var saturationSlider = $("saturation");
+
+    saturationSlider.oninput = function () {
+        $("saturation-value").innerHTML = saturationSlider.value;
+    };
     saturationSlider.onchange = function () {
-        saturation(saturationSlider.value);
-        document.getElementById("saturation-value").innerHTML = saturationSlider.value;
+        cubes.saturation(saturationSlider.value);
+        $("saturation-value").innerHTML = saturationSlider.value;
     };
 
 
-    camera.position.z = number * 6;
-
-    toRGB();
-    renderer.render(scene, camera);
+    // add generic function to keep rerender
+    // this is dumb, should only do it while key down
+    dt.add(function () {});
 
     var rotate = 0.1 / Math.PI;
+    var camera = view.getCamera();
 
     window.onkeydown = function (e) {
-        switch (e.keyCode) {
-            case 37: group.rotation.y -= rotate; e.preventDefault(); break; // right
-            case 38: group.rotation.x -= rotate; e.preventDefault(); break; // up
-            case 39: group.rotation.y += rotate; e.preventDefault(); break; // left
-            case 40: group.rotation.x += rotate; e.preventDefault(); break; // down
+        var pd = e.preventDefault.bind(e);
 
-            case 68: camera.position.x += 1; e.preventDefault(); break; // d
-            case 87: camera.position.z -= 1; e.preventDefault(); break; // w
-            case 65: camera.position.x -= 1; e.preventDefault(); break; // a
-            case 83: camera.position.z += 1; e.preventDefault(); break; // s
+        switch (e.keyCode) {
+            case 37: group.rotation.y -= rotate; pd(); break; // right
+            case 38: group.rotation.x -= rotate; pd(); break; // up
+            case 39: group.rotation.y += rotate; pd(); break; // left
+            case 40: group.rotation.x += rotate; pd(); break; // down
+
+            case 68: camera.position.x += 1; pd(); break; // d
+            case 87: camera.position.z -= 1; pd(); break; // w
+            case 65: camera.position.x -= 1; pd(); break; // a
+            case 83: camera.position.z += 1; pd(); break; // s
         }
     };
-}(this.document))
+}());
 
-},{"../vendor/ramda/ramda":2,"../vendor/threejs/build/three":3}],2:[function(require,module,exports){
+},{"./cubes":2,"./dt":3,"./scene":5,"./select":6}],5:[function(require,module,exports){
+(function () {
+    "use strict";
+
+    var three = require("../vendor/threejs/build/three");
+
+    var renderer, scene, camera;
+
+    var initialise = function (width, height, background) {
+        renderer = new three.WebGLRenderer();
+        renderer.setSize(width, height);
+
+        if (background) {
+            renderer.setClearColor(background, 1);
+        }
+
+        scene = new three.Scene();
+        camera = new three.PerspectiveCamera(75, width/height, 0.1, 1000);
+    };
+
+    var appendTo = function (element) {
+        if (!renderer) {
+            throw new Error("Renderer has not been initialised");
+        }
+
+        element.appendChild(renderer.domElement);
+    };
+
+    module.exports = {
+        initialise: initialise,
+        appendTo: appendTo,
+        render: function () {
+            renderer.render(scene, camera);
+        },
+        getScene: function () {
+            return scene;
+        },
+        getCamera: function () {
+            return camera;
+        }
+    };
+}());
+
+},{"../vendor/threejs/build/three":8}],6:[function(require,module,exports){
+(function (document) {
+    "use strict";
+
+    var select = function (id) {
+        return document.getElementById(id);
+    };
+
+    module.exports = select;
+}(document));
+
+},{}],7:[function(require,module,exports){
 //     ramda.js
 //     https://github.com/ramda/ramda
 //     (c) 2013-2014 Scott Sauyet and Michael Hurley
@@ -6411,7 +6519,7 @@
     return R;
 }));
 
-},{}],3:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 // File:src/Three.js
 
 /**
@@ -40958,4 +41066,4 @@ THREE.MorphBlendMesh.prototype.update = function ( delta ) {
 };
 
 
-},{}]},{},[1]);
+},{}]},{},[4]);
