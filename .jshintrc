@@ -1,5 +1,5 @@
 {
-    "node": false,
+    "node": true,
     "browser": true,
     "esnext": false,
     "bitwise": true,
@@ -17,11 +17,7 @@
     "strict": true,
     "smarttabs": true,
     "globals": {
-        "confirm": false,
-        "requirejs": false,
         "require": false,
-        "define": false,
-        "jQuery": false,
         "Promise": false
     }
 }
