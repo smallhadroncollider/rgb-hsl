@@ -9,6 +9,8 @@
         <style>
             body { margin: 0; }
             canvas { margin: 50px auto; display: block; }
+            label { display: inline-block; width: 150px;}
+            input { display: inline-block; margin: 0 100px 0 0;}
         </style>
     </head>
 
@@ -16,8 +18,21 @@
         <button id="hsl">To HSL</button>
         <button id="rgb">To RGB</button>
 
-        <input id="saturation" type="range" min="0" max="1" step="0.01" value="0" />
-        <label>Saturation: <span id="saturation-value">0</span></label>
+        <div>
+            <label>Saturation Min: <span id="saturation-min-value">0</span></label>
+            <input id="saturation-min" type="range" min="0" max="1" step="0.01" value="0" />
+
+            <label>Saturation Max: <span id="saturation-max-value">1</span></label>
+            <input id="saturation-max" type="range" min="0" max="1" step="0.01" value="1" />
+        </div>
+
+        <div>
+            <label>Lightness Min: <span id="lightness-min-value">0</span></label>
+            <input id="lightness-min" type="range" min="0" max="1" step="0.01" value="0" />
+
+            <label>Lightness Max: <span id="lightness-max-value">1</span></label>
+            <input id="lightness-max" type="range" min="0" max="1" step="0.01" value="1" />
+        </div>
 
         <script src="app.js"></script>
     </body>

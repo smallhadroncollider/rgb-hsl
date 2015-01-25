@@ -83,14 +83,37 @@
         }, cubes);
     };
 
-    var saturation = function (val) {
+    var hslLimits = {
+        saturation: {
+            min: 0,
+            max: 1
+        },
+        lightness: {
+            min: 0,
+            max: 1
+        }
+    };
+
+    var showHSL = function () {
         R.forEach(function (cube) {
-            if (cube.userData.hsl[1] > val) {
+            var hsl = cube.userData.hsl;
+
+            if (
+                hsl[1] >= hslLimits.saturation.min &&
+                hsl[2] >= hslLimits.lightness.min &&
+                hsl[1] <= hslLimits.saturation.max &&
+                hsl[2] <= hslLimits.lightness.max
+            ) {
                 dt.animate(cube.material, "opacity", 1, 1000);
             } else {
-                dt.animate(cube.material, "opacity", 0.1, 1000);
+                dt.animate(cube.material, "opacity", 0, 1000);
             }
         }, cubes);
+    };
+
+    var setHSLLimit = function (type, minMax, val) {
+        hslLimits[type][minMax] = val;
+        showHSL();
     };
 
     module.exports = {
@@ -98,6 +121,6 @@
         toHSL: toHSL,
         toHSLCube: toHSLCube,
         toRGB: toRGB,
-        saturation: saturation
+        setHSLLimit: setHSLLimit
     };
 }());

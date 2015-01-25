@@ -8,7 +8,7 @@
     view.initialise(1000, 600, 0x808080);
     view.appendTo(document.body);
 
-    var number = 12;
+    var number = 15;
     view.getCamera().position.z = number * 6;
 
     var group = cubes.initialise(number);
@@ -21,19 +21,28 @@
      * Interaction
      */
     var $ = require("./select");
+    var R = require("../vendor/ramda/ramda");
+
 
     $("hsl").onclick = cubes.toHSL;
     $("rgb").onclick = cubes.toRGB;
 
-    var saturationSlider = $("saturation");
+    var setupSlider = function (type, minMax) {
+        var slider = $(type + "-" + minMax);
+        var valueText = $(type + "-" + minMax + "-value");
 
-    saturationSlider.oninput = function () {
-        $("saturation-value").innerHTML = saturationSlider.value;
+        slider.oninput = function () {
+            valueText.innerHTML = slider.value;
+        };
+
+        slider.onchange = function () {
+            cubes.setHSLLimit(type, minMax, slider.value);
+            valueText.innerHTML = slider.value;
+        };
     };
-    saturationSlider.onchange = function () {
-        cubes.saturation(saturationSlider.value);
-        $("saturation-value").innerHTML = saturationSlider.value;
-    };
+
+    var lift = R.liftN(2, R.curryN(2, setupSlider));
+    lift(["saturation", "lightness"], ["max", "min"]);
 
 
     // add generic function to keep rerender

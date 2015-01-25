@@ -122,14 +122,37 @@
         }, cubes);
     };
 
-    var saturation = function (val) {
+    var hslLimits = {
+        saturation: {
+            min: 0,
+            max: 1
+        },
+        lightness: {
+            min: 0,
+            max: 1
+        }
+    };
+
+    var showHSL = function () {
         R.forEach(function (cube) {
-            if (cube.userData.hsl[1] > val) {
+            var hsl = cube.userData.hsl;
+
+            if (
+                hsl[1] >= hslLimits.saturation.min &&
+                hsl[2] >= hslLimits.lightness.min &&
+                hsl[1] <= hslLimits.saturation.max &&
+                hsl[2] <= hslLimits.lightness.max
+            ) {
                 dt.animate(cube.material, "opacity", 1, 1000);
             } else {
-                dt.animate(cube.material, "opacity", 0.1, 1000);
+                dt.animate(cube.material, "opacity", 0, 1000);
             }
         }, cubes);
+    };
+
+    var setHSLLimit = function (type, minMax, val) {
+        hslLimits[type][minMax] = val;
+        showHSL();
     };
 
     module.exports = {
@@ -137,7 +160,7 @@
         toHSL: toHSL,
         toHSLCube: toHSLCube,
         toRGB: toRGB,
-        saturation: saturation
+        setHSLLimit: setHSLLimit
     };
 }());
 
@@ -211,7 +234,7 @@
     view.initialise(1000, 600, 0x808080);
     view.appendTo(document.body);
 
-    var number = 12;
+    var number = 15;
     view.getCamera().position.z = number * 6;
 
     var group = cubes.initialise(number);
@@ -224,19 +247,28 @@
      * Interaction
      */
     var $ = require("./select");
+    var R = require("../vendor/ramda/ramda");
+
 
     $("hsl").onclick = cubes.toHSL;
     $("rgb").onclick = cubes.toRGB;
 
-    var saturationSlider = $("saturation");
+    var setupSlider = function (type, minMax) {
+        var slider = $(type + "-" + minMax);
+        var valueText = $(type + "-" + minMax + "-value");
 
-    saturationSlider.oninput = function () {
-        $("saturation-value").innerHTML = saturationSlider.value;
+        slider.oninput = function () {
+            valueText.innerHTML = slider.value;
+        };
+
+        slider.onchange = function () {
+            cubes.setHSLLimit(type, minMax, slider.value);
+            valueText.innerHTML = slider.value;
+        };
     };
-    saturationSlider.onchange = function () {
-        cubes.saturation(saturationSlider.value);
-        $("saturation-value").innerHTML = saturationSlider.value;
-    };
+
+    var lift = R.liftN(2, R.curryN(2, setupSlider));
+    lift(["saturation", "lightness"], ["max", "min"]);
 
 
     // add generic function to keep rerender
@@ -263,7 +295,7 @@
     };
 }());
 
-},{"./cubes":2,"./dt":3,"./scene":5,"./select":6}],5:[function(require,module,exports){
+},{"../vendor/ramda/ramda":7,"./cubes":2,"./dt":3,"./scene":5,"./select":6}],5:[function(require,module,exports){
 (function () {
     "use strict";
 
