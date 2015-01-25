@@ -5,13 +5,15 @@
     var dt = require("./dt");
     var cubes = require("./cubes");
 
-    view.initialise(1000, 600, 0x808080);
+    view.initialise(window.innerWidth, 500, 0x808080);
     view.appendTo(document.body);
 
-    var number = 15;
+    var number = 10;
     view.getCamera().position.z = number * 6;
 
     var group = cubes.initialise(number);
+    group.rotation.x = Math.PI / 4;
+    group.rotation.y = - Math.PI / 4;
     view.getScene().add(group);
 
     cubes.toRGB();
