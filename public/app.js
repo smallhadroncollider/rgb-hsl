@@ -239,12 +239,14 @@
 (function () {
     "use strict";
 
+    var $ = require("./select");
+
     var view = require("./scene");
     var dt = require("./dt");
     var cubes = require("./cubes");
 
-    view.initialise(window.innerWidth, 500, 0x808080);
-    view.appendTo(document.body);
+    view.initialise(window.innerWidth - 40, 500, 0x808080);
+    view.appendTo($("canvas"));
 
     var number = 10;
     view.getCamera().position.z = number * 6;
@@ -260,7 +262,6 @@
     /**
      * Interaction
      */
-    var $ = require("./select");
     var R = require("../vendor/ramda/ramda");
 
 
@@ -271,14 +272,14 @@
         var slider = $(type + "-" + minMax);
         var valueText = $(type + "-" + minMax + "-value");
 
-        slider.oninput = function () {
+        slider.addEventListener("input", function () {
             valueText.innerHTML = slider.value;
-        };
+        });
 
-        slider.onchange = function () {
+        slider.addEventListener("change", function () {
             cubes.setHSLLimit(type, minMax, slider.value);
             valueText.innerHTML = slider.value;
-        };
+        });
     };
 
     var lift = R.liftN(2, R.curryN(2, setupSlider));
