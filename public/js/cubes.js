@@ -88,7 +88,7 @@
         }, cubes);
     };
 
-    var limits = {
+    var defaults = {
         saturation: {
             min: 0,
             max: 1
@@ -110,6 +110,8 @@
             max: 255
         }
     };
+
+    var limits;
 
     var renderLimits = function () {
         R.forEach(function (cube) {
@@ -141,10 +143,20 @@
         renderLimits();
     };
 
+    var resetLimits = function () {
+        limits = R.clone(defaults);
+    };
+
+    resetLimits();
+
     module.exports = {
         initialise: initialise,
         toHSL: toHSL,
         toRGB: toRGB,
-        setLimit: setLimit
+        setLimit: setLimit,
+        resetLimits: function () {
+            resetLimits();
+            renderLimits();
+        }
     };
 }());
