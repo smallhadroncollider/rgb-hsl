@@ -8,16 +8,27 @@
 
     var number, factor, range, size, gap, offset, lift, cubes, group;
 
-    var position = function (val) {
+    var rgbPosition = function (val) {
         return (val * (size + gap)) - offset;
+    };
+
+    var hslPosition = function (hsl) {
+        var x = (hsl[2] * number * size * gap * 2) - offset * 1.5;
+
+        var r = hsl[1] * number * 2;
+        var theta = ((hsl[0] / 360) * 2 * Math.PI) + (1.2 * Math.PI);
+        var y = r * Math.cos(theta);
+        var z = r * Math.sin(theta);
+
+        return [x, y, z];
     };
 
     var value = function (x) {
         return Math.round(x * factor);
     };
 
-    var create = function (r, g, b) {
-        var rgb = R.map(value, [r, g, b]);
+    var create = function (rGrid, gGrid, bGrid) {
+        var rgb = R.map(value, [rGrid, gGrid, bGrid]);
 
         var color = "rgb(" + rgb.join(",") + ")";
         var geometry = new three.BoxGeometry(size, size, size);
@@ -25,8 +36,12 @@
 
         var cube = new three.Mesh(geometry, material);
 
-        cube.userData.rgb = [r, g, b];
-        cube.userData.hsl = colour.hsl.apply(null, rgb);
+        var hsl = colour.hsl.apply(null, rgb);
+
+        cube.userData.rgb = rgb;
+        cube.userData.rgbCoordinates = R.map(rgbPosition, [rGrid, gGrid, bGrid]);
+        cube.userData.hsl = hsl;
+        cube.userData.hslCoordinates = hslPosition(hsl);
 
         return cube;
     };
@@ -50,32 +65,21 @@
 
     var toRGB = function () {
         R.forEach(function (cube) {
-            dt.animate(cube.position, "x", position(cube.userData.rgb[0]), 5000);
-            dt.animate(cube.position, "y", position(cube.userData.rgb[1]), 5000);
-            dt.animate(cube.position, "z", position(cube.userData.rgb[2]), 5000);
+            var coords = cube.userData.rgbCoordinates;
+
+            dt.animate(cube.position, "x", coords[0], 5000);
+            dt.animate(cube.position, "y", coords[1], 5000);
+            dt.animate(cube.position, "z", coords[2], 5000);
         }, cubes);
     };
 
     var toHSL = function () {
         R.forEach(function (cube) {
-            var x = (cube.userData.hsl[2] * number * size * gap * 2) - offset * 1.5;
+            var coords = cube.userData.hslCoordinates;
 
-            var r = cube.userData.hsl[1] * number * 2;
-            var theta = ((cube.userData.hsl[0] / 360) * 2 * Math.PI) + (1.2 * Math.PI);
-            var y = r * Math.cos(theta);
-            var z = r * Math.sin(theta);
-
-            dt.animate(cube.position, "x", x, 5000);
-            dt.animate(cube.position, "y", y, 5000);
-            dt.animate(cube.position, "z", z, 5000);
-        }, cubes);
-    };
-
-    var toHSLCube = function () {
-        R.forEach(function (cube) {
-            dt.animate(cube.position, "x", position((cube.userData.hsl[0] / 360) * factor), 5000);
-            dt.animate(cube.position, "y", position(cube.userData.hsl[1] * factor), 5000);
-            dt.animate(cube.position, "z", position(cube.userData.hsl[2] * factor), 5000);
+            dt.animate(cube.position, "x", coords[0], 5000);
+            dt.animate(cube.position, "y", coords[1], 5000);
+            dt.animate(cube.position, "z", coords[2], 5000);
         }, cubes);
     };
 
@@ -135,7 +139,6 @@
     module.exports = {
         initialise: initialise,
         toHSL: toHSL,
-        toHSLCube: toHSLCube,
         toRGB: toRGB,
         setLimit: setLimit
     };
