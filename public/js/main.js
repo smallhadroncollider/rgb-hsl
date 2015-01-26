@@ -10,7 +10,7 @@
     view.initialise(window.innerWidth - 40, 500, 0x808080);
     view.appendTo($("canvas"));
 
-    var number = 13;
+    var number = 12;
     view.getCamera().position.z = number * 6;
 
     var group = cubes.initialise(number);
@@ -81,5 +81,28 @@
         }
     });
 
+    var Hammer = require("../vendor/hammerjs/hammer");
+    var touch = new Hammer($("canvas"));
 
+    touch.get("pan").set({ direction: Hammer.DIRECTION_ALL });
+
+    touch.on("panleft", function (e) {
+        e.preventDefault();
+        group.rotation.y += rotate * 5;
+    });
+
+    touch.on("panright", function (e) {
+        e.preventDefault();
+        group.rotation.y -= rotate * 5;
+    });
+
+    touch.on("panup", function (e) {
+        e.preventDefault();
+        group.rotation.x -= rotate * 5;
+    });
+
+    touch.on("pandown", function (e) {
+        e.preventDefault();
+        group.rotation.x += rotate * 5;
+    });
 }());
