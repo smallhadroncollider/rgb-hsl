@@ -10,7 +10,7 @@
     view.initialise(window.innerWidth - 40, 500, 0x808080);
     view.appendTo($("canvas"));
 
-    var number = 12;
+    var number = 13;
     view.getCamera().position.z = number * 6;
 
     var group = cubes.initialise(number);
