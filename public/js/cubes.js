@@ -13,10 +13,15 @@
     };
 
     var hslPosition = function (hsl) {
-        var x = (hsl[2] * number * size * gap * 2) - offset * 1.5;
+        var blockSize = number * ((size + gap) * 2);
+
+        var x = ((hsl[2] - 0.5) * blockSize); // adjust by -0.5 to center on 0
 
         var r = hsl[1] * number * 2;
-        var theta = ((hsl[0] / 360) * 2 * Math.PI) + (1.2 * Math.PI);
+
+        var theta = ((hsl[0] / 360) * 2 * Math.PI); // get value in radians
+        theta += (1.2 * Math.PI); // rotate to be with blue at front
+
         var y = r * Math.cos(theta);
         var z = r * Math.sin(theta);
 
@@ -48,7 +53,7 @@
 
     var initialise = function (num) {
         number = num;
-        factor = 255 / number;
+        factor = 255 / (number - 1);
         range = R.range(0, number);
         size = 2;
         gap = 2;
