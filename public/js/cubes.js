@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    var R = require("../vendor/ramda/ramda");
+    var R = require("../vendor/ramda/dist/ramda");
     var three = require("../vendor/threejs/build/three");
     var colour = require("./colour");
     var dt = require("./dt");

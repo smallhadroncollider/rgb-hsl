@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    var R = require("../vendor/ramda/ramda");
+    var R = require("../vendor/ramda/dist/ramda");
 
     var normalise = R.curry(function (min, max, val) {
         if (val > max) {

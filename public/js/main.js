@@ -24,7 +24,7 @@
     /**
      * Interaction
      */
-    var R = require("../vendor/ramda/ramda");
+    var R = require("../vendor/ramda/dist/ramda");
 
 
     $("hsl").onclick = cubes.toHSL;
