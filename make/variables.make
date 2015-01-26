@@ -14,14 +14,7 @@ dev_js			:=		$(shell find $(dev_public)/js -name "*.js")
 #####################
 # Build directories #
 #####################
-output			:=		/Users/mark/project-builds/
-build_public	:=		$(output)/public
+build			:=		/Users/mark/project-builds/smallhadroncollider-labs/rgb-hsl
 
-build_www		:=		$(build_public)
-build_css		:=		$(build_public)/*.css
-build_js		:=		$(build_public)/*.js
-build_img		:=		$(build_public)/img/
-build_fonts		:=		$(build_public)/fonts/
-
-js_replace		:=		$(build_public)/index.html
-css_replace		:=		$(build_public)/index.html
+js_replace		:=		$(build)/index.html
+css_replace		:=		$(build)/index.html
