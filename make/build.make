@@ -14,16 +14,19 @@ after:
 	@ git stash pop > /dev/null
 	@ printf "\nUnstashing uncommitted changes\n\n"
 
-$(build)/index.html: $(dev_public)/index.html
+$(build)/index.html: $(dev_public)/index.html $(dev_public)/app.js
+	@- rm $@
 	@ cp $(dev_public)/index.html $@
 
 $(build)/*.js: $(dev_public)/app.js $(build)/index.html
+	@- rm $(dir $@)/*.app.js
 	@ uglifyjs $(dev_public)/app.js -m -c > $(dir $@)/app.js
 	@ hash=$$(hash.sh $(dir $@)/app.js); \
 		replace.sh "<script src=\"app.js\">" "<script src=\"$$hash.app.js\">" "$(js_replace)"
 
 
 $(build)/*.css: $(dev_public)/vendor/skeleton/css/normalize.css $(dev_public)/vendor/skeleton/css/skeleton.css $(build)/index.html
+	@- rm $(dir $@)/*.app.css
 	@ uglifycss $^ > $(dir $@)/app.css
 	@ hash=$$(hash.sh $(dir $@)/app.css); \
 		replace.sh "<link rel=\"stylesheet\" href=\"vendor/skeleton/css/normalize.css\">" "" "$(css_replace)"; \
