@@ -65,7 +65,7 @@
 
     var camera = view.getCamera();
 
-    window.onkeydown = function (e) {
+    window.addEventListener("keydown", function (e) {
         var pd = e.preventDefault.bind(e);
 
         switch (e.keyCode) {
@@ -79,5 +79,7 @@
             case 65: camera.position.x -= 1; pd(); break; // a
             case 83: camera.position.z += 1; pd(); break; // s
         }
-    };
+    });
+
+
 }());
