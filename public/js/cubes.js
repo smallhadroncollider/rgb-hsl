@@ -23,10 +23,6 @@
         var geometry = new three.BoxGeometry(size, size, size);
         var material = new three.MeshBasicMaterial({ color: color, transparent: true, opacity: 1 });
 
-        r = position(r);
-        g = position(g);
-        b = position(b);
-
         var cube = new three.Mesh(geometry, material);
 
         cube.userData.rgb = [r, g, b];
@@ -54,9 +50,9 @@
 
     var toRGB = function () {
         R.forEach(function (cube) {
-            dt.animate(cube.position, "x", cube.userData.rgb[0], 5000);
-            dt.animate(cube.position, "y", cube.userData.rgb[1], 5000);
-            dt.animate(cube.position, "z", cube.userData.rgb[2], 5000);
+            dt.animate(cube.position, "x", position(cube.userData.rgb[0]), 5000);
+            dt.animate(cube.position, "y", position(cube.userData.rgb[1]), 5000);
+            dt.animate(cube.position, "z", position(cube.userData.rgb[2]), 5000);
         }, cubes);
     };
 
@@ -83,7 +79,7 @@
         }, cubes);
     };
 
-    var hslLimits = {
+    var limits = {
         saturation: {
             min: 0,
             max: 1
@@ -91,18 +87,38 @@
         lightness: {
             min: 0,
             max: 1
+        },
+        red: {
+            min: 0,
+            max: 255
+        },
+        green: {
+            min: 0,
+            max: 255
+        },
+        blue: {
+            min: 0,
+            max: 255
         }
     };
 
-    var showHSL = function () {
+    var renderLimits = function () {
         R.forEach(function (cube) {
-            var hsl = cube.userData.hsl;
+            var hsl = cube.userData.hsl,
+                rgb = cube.userData.rgb;
 
             if (
-                hsl[1] >= hslLimits.saturation.min &&
-                hsl[2] >= hslLimits.lightness.min &&
-                hsl[1] <= hslLimits.saturation.max &&
-                hsl[2] <= hslLimits.lightness.max
+                hsl[1] >= limits.saturation.min &&
+                hsl[2] >= limits.lightness.min &&
+                hsl[1] <= limits.saturation.max &&
+                hsl[2] <= limits.lightness.max &&
+
+                rgb[0] >= limits.red.min &&
+                rgb[0] <= limits.red.max &&
+                rgb[1] >= limits.green.min &&
+                rgb[1] <= limits.green.max &&
+                rgb[2] >= limits.blue.min &&
+                rgb[2] <= limits.blue.max
             ) {
                 dt.animate(cube.material, "opacity", 1, 1000);
             } else {
@@ -111,9 +127,9 @@
         }, cubes);
     };
 
-    var setHSLLimit = function (type, minMax, val) {
-        hslLimits[type][minMax] = val;
-        showHSL();
+    var setLimit = function (type, minMax, val) {
+        limits[type][minMax] = val;
+        renderLimits();
     };
 
     module.exports = {
@@ -121,6 +137,6 @@
         toHSL: toHSL,
         toHSLCube: toHSLCube,
         toRGB: toRGB,
-        setHSLLimit: setHSLLimit
+        setLimit: setLimit
     };
 }());

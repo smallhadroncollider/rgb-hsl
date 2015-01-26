@@ -10,7 +10,7 @@
     view.initialise(window.innerWidth - 40, 500, 0x808080);
     view.appendTo($("canvas"));
 
-    var number = 10;
+    var number = 12;
     view.getCamera().position.z = number * 6;
 
     var group = cubes.initialise(number);
@@ -39,7 +39,7 @@
         });
 
         slider.addEventListener("change", function () {
-            cubes.setHSLLimit(type, minMax, slider.value);
+            cubes.setLimit(type, minMax, slider.value);
             valueText.innerHTML = slider.value;
         });
     };
