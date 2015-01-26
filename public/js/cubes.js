@@ -143,6 +143,14 @@
         renderLimits();
     };
 
+    var setLimits = function (limitSet) {
+        R.forEach(function (limit) {
+            limits[limit[0]][limit[1]] = limit[2];
+        }, limitSet);
+
+        renderLimits();
+    };
+
     var resetLimits = function () {
         limits = R.clone(defaults);
     };
@@ -154,6 +162,7 @@
         toHSL: toHSL,
         toRGB: toRGB,
         setLimit: setLimit,
+        setLimits: setLimits,
         resetLimits: function () {
             resetLimits();
             renderLimits();
