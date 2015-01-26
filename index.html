@@ -8,7 +8,7 @@
 
         <link href='//fonts.googleapis.com/css?family=Raleway:400,300,600' rel='stylesheet' type='text/css'>
         
-        <link rel="stylesheet" href="a488a12.app.css">
+        <link rel="stylesheet" href="a15d93e.app.css">
 
         <style>
             canvas {
@@ -18,6 +18,13 @@
 
             #canvas {
                 background: #808080;
+                position: relative;
+            }
+
+            .animate-button {
+                position: absolute;
+                bottom: 0;
+                right: 10px;
             }
         </style>
     </head>
@@ -29,7 +36,11 @@
             <p><strong>Requires browser with WebGL support</strong></p>
         </div>
 
-        <div id="canvas"></div>
+        <div id="canvas">
+            <label class="animate-button">
+                Animate <input id="animate" type="checkbox" checked />
+            </label>
+        </div>
 
 
         <div class="container">
@@ -60,12 +71,8 @@
             </div>
 
             <div class="row">
-                <button class="four columns" id="rgb">Show as RGB cube</button>
-                <button class="four columns" id="hsl">Show as HSL cylinder</button>
-
-                <label class="four columns">
-                    <input id="animate" type="checkbox" checked /> Animate
-                </label>
+                <button class="six columns" id="rgb">Show as RGB cube</button>
+                <button class="six columns" id="hsl">Show as HSL cylinder</button>
             </div>
 
             <hr />
@@ -98,6 +105,6 @@
             <p>Created at <a href="http://smallhadroncollider.com">Small Hadron Collider</a> Labs in Bristol</p>
         </div>
 
-        <script src="45f8dbc.app.js"></script>
+        <script src="cd7f2b5.app.js"></script>
     </body>
 </html>
